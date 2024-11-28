@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Install redis via Apt packages
+DEBIAN_FRONTEND=noninteractive apt-get update -q
+DEBIAN_FRONTEND=noninteractive apt-get install -q -y redis
+
+# Configure redis to accept connections from all IPs, and add a password
+sed -e '/^bind/s/bind.*/bind 0.0.0.0/' -i /etc/redis/redis.conf
+sed -e '/# requirepass/s/.*/requirepass ${password}/' -i /etc/redis/redis.conf
+
+# Restart redis service to reload the configuration
+systemctl restart redis-server.service

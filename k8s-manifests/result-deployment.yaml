@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: result
+  name: result-deplt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: result
+  template:
+    metadata:
+      labels:
+        app: result
+    spec:
+      containers:
+      - image: europe-west9-docker.pkg.dev/tuto-terraform-406010/voting-app-repo/result
+        name: result-container
+        ports:
+        - containerPort: 80
+          name: result-port
+        livenessProbe:
+          httpGet:
+            path: /
+            port: result-port
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 2
+          initialDelaySeconds: 5

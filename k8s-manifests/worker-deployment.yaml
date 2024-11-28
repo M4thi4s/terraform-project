@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: worker
+  name: worker-deplt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+      - image: europe-west9-docker.pkg.dev/tuto-terraform-406010/voting-app-repo/worker
+        name: worker-container

@@ -1,0 +1,131 @@
+# version is now using "compose spec"
+# v2 and v3 are now combined!
+# docker-compose v1.27+ required
+
+services:
+
+  vote1:
+    # image: europe-west9-docker.pkg.dev/nuage-k8s/login-nuage-images/vote
+    # image: eloip13009/vote
+    build:
+      context: ./voting-services/vote
+      dockerfile: Dockerfile
+    healthcheck: 
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 15s
+      timeout: 5s
+      retries: 2
+      start_period: 5s
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - front-tier
+      - back-tier
+
+  vote2:
+    # image: europe-west9-docker.pkg.dev/nuage-k8s/login-nuage-images/vote
+    # image: eloip13009/vote
+    build:
+      context: ./voting-services/vote
+      dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 15s
+      timeout: 5s
+      retries: 2
+      start_period: 5s
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - front-tier
+      - back-tier
+
+  result:
+    # image: europe-west9-docker.pkg.dev/nuage-k8s/login-nuage-images/result
+    # image: eloip13009/result
+    build:
+      context: ./voting-services/result
+    depends_on:
+      db:
+        condition: service_healthy 
+    ports:
+      - "5050:80"
+      - "9229:9229"
+    networks:
+      - front-tier
+      - back-tier
+
+  worker:
+    # image: europe-west9-docker.pkg.dev/nuage-k8s/login-nuage-images/worker
+    # image: eloip13009/worker
+    build:
+      context: ./voting-services/worker
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    networks:
+      - back-tier
+
+  redis:
+    image: redis:alpine    # here is no dockerfile
+    # image: europe-west9-docker.pkg.dev/nuage-k8s/login-nuage-images/redis-hs
+    # image: eloip13009/redis-hc
+    healthcheck:
+      test: /healthchecks/redis.sh
+      interval: "5s"
+    volumes:
+      - "./healthchecks:/healthchecks"
+    networks:
+      - back-tier
+
+  db:
+    image: postgres:15-alpine    # here is no dockerfile
+    healthcheck:
+      test: /healthchecks/postgres.sh
+      interval: "5s"
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+      - "./healthchecks:/healthchecks"
+    networks:
+      - back-tier
+
+  nginx:
+    build:
+      context: ./voting-services/nginx
+    ports:
+      - "8000:8000"
+    depends_on:
+      vote1:
+        condition: service_healthy
+      vote2:
+        condition: service_healthy
+    networks:
+      - front-tier
+
+  seed:
+    # image: europe-west9-docker.pkg.dev/nuage-k8s/login-nuage-images/seed-data
+    # image: eloip13009/seed-data:vote5000
+    build:
+      context: ./voting-services/seed-data
+      dockerfile: Dockerfile
+    environment:
+      TARGET_HOST: "nginx"
+      TARGET_PORT: 8000
+    depends_on:
+      - nginx
+    networks:
+      - front-tier
+    restart: "no"
+
+volumes:
+  db-data:
+
+networks:
+  front-tier:
+  back-tier:

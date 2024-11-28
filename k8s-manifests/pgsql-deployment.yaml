@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: pgsql
+  name: pgsql-deplt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgsql
+  template:
+    metadata:
+      labels:
+        app: pgsql
+    spec:
+      volumes:
+      - name: db-data
+        # emptyDir: {}
+        persistentVolumeClaim:
+          claimName: db-data-claim
+      containers:
+      - image: postgres:15-alpine
+        name: postgres-container
+        env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        ports:
+        - containerPort: 5432
+          name: postgres-port
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: db-data
+          subPath: data
+        livenessProbe:
+          exec:
+            command:
+            - /healthchecks/postgres.sh
+          periodSeconds: 15

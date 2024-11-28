@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: pgsql
+  name: db
+spec:
+  type: ClusterIP
+  ports:
+  - name: pgsql-svc-port
+    port: 5432
+    targetPort: postgres-port
+  selector:
+    app: pgsql
