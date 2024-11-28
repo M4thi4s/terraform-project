@@ -1,0 +1,7 @@
+part2/credentials.json
+part2/.terraform.lock.hcl
+part2/terraform.tfstate.backup
+part2/terraform.tfstate
+part2/.terraform/modules/modules.json
+part2/.terraform/providers/registry.terraform.io/hashicorp/google/5.6.0/darwin_arm64/terraform-provider-google_v5.6.0_x5
+part2/.terraform/providers/registry.terraform.io/hashicorp/kubernetes/2.34.0/darwin_arm64/terraform-provider-kubernetes_v2.34.0_x5
