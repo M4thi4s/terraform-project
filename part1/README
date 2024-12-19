@@ -1,0 +1,8 @@
+Step to run the part 1 of the project : 
+1. Start docker
+2. Run the following command in the terminal : 
+
+docker network remove back-tier
+docker network remove front-tier
+clear && terraform plan
+clear && terraform apply
